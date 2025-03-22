@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anonymous Messenger</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 2px 2px red, -2px -2px blue; }
+            50% { text-shadow: -2px -2px red, 2px 2px blue; }
+            100% { text-shadow: 2px 2px red, -2px -2px blue; }
+        }
+    </style>
+</head>
+<body class="bg-black text-green-400 flex flex-col justify-center items-center min-h-screen">
+    <div class="w-full max-w-md p-6 bg-gray-900 rounded-xl shadow-lg text-center animate-fadeIn flex-grow">
+        <h1 class="text-2xl font-bold mb-4 animate-glitch">💀 Anonymous Messenger</h1>
+        
+        <div id="intro" class="flex flex-col space-y-4">
+            <button onclick="showEncrypt()" class="p-3 bg-blue-600 hover:bg-blue-700 rounded text-white transition transform hover:scale-105">Encrypt a Message</button>
+            <button onclick="showDecrypt()" class="p-3 bg-green-600 hover:bg-green-700 rounded text-white transition transform hover:scale-105">Decrypt a Message</button>
+        </div>
+        
+        <div id="encryptSection" class="hidden animate-fadeIn">
+            <input id="senderName" type="text" placeholder="Your Name (Optional)" class="w-full p-2 bg-gray-700 rounded mb-2">
+            <textarea id="inputText" placeholder="Type your message..." class="w-full p-2 bg-gray-700 rounded mb-2"></textarea>
+            <button onclick="encryptMessage()" class="w-full p-2 bg-blue-600 hover:bg-blue-700 rounded">Encrypt</button>
+            <h2 class="mt-4 text-lg font-semibold">🔒 Encrypted Message:</h2>
+            <p id="encryptedText" class="p-2 bg-gray-700 rounded break-words"></p>
+            <button onclick="copyToClipboard()" class="w-full p-2 bg-yellow-600 hover:bg-yellow-700 rounded mt-2">Copy Encrypted Text</button>
+            <button onclick="generateQR()" class="w-full p-2 bg-purple-600 hover:bg-purple-700 rounded mt-2">Generate QR Code</button>
+            <div id="qrCode" class="mt-4"></div>
+        </div>
+
+        <div id="decryptSection" class="hidden animate-fadeIn">
+            <textarea id="decryptInput" placeholder="Paste encrypted message..." class="w-full p-2 bg-gray-700 rounded mb-2"></textarea>
+            <button onclick="decryptMessage()" class="w-full p-2 bg-green-600 hover:bg-green-700 rounded">Decrypt</button>
+            <h2 class="mt-4 text-lg font-semibold">🔓 Decrypted Message:</h2>
+            <p id="decryptedText" class="p-2 bg-gray-700 rounded break-words"></p>
+            <p id="senderInfo" class="p-2 bg-gray-700 rounded break-words"></p>
+        </div>
+    </div>
+    
+    <footer class="w-full text-center py-4 text-gray-400 bg-gray-900 border-t border-gray-700 animate-pulse mt-auto">
+        <p class="text-sm tracking-wider">☠️ Crafted by <span class="text-red-600">GhostScript</span> ☠️</p>
+    </footer>
+    
+    <script>
+        function showEncrypt() {
+            document.getElementById("intro").classList.add("hidden");
+            document.getElementById("encryptSection").classList.remove("hidden");
+        }
+
+        function showDecrypt() {
+            document.getElementById("intro").classList.add("hidden");
+            document.getElementById("decryptSection").classList.remove("hidden");
+        }
+
+        function encryptMessage() {
+            let name = document.getElementById("senderName").value;
+            let text = document.getElementById("inputText").value;
+            let data = JSON.stringify({ name, text });
+            let encoded = btoa(unescape(encodeURIComponent(data)));
+            document.getElementById("encryptedText").innerText = encoded;
+        }
+
+        function decryptMessage() {
+            let encryptedText = document.getElementById("decryptInput").value;
+            try {
+                let decoded = decodeURIComponent(escape(atob(encryptedText)));
+                let data = JSON.parse(decoded);
+                document.getElementById("decryptedText").innerText = `Message: ${data.text}`;
+                document.getElementById("senderInfo").innerText = data.name ? `From: ${data.name}` : "From: Anonymous";
+            } catch (error) {
+                document.getElementById("decryptedText").innerText = "Invalid Encrypted Message";
+                document.getElementById("senderInfo").innerText = "";
+            }
+        }
+
+        function copyToClipboard() {
+            let encryptedText = document.getElementById("encryptedText").innerText;
+            navigator.clipboard.writeText(encryptedText).then(() => {
+                alert("Copied to clipboard!");
+            });
+        }
+
+        function generateQR() {
+            let encryptedText = document.getElementById("encryptedText").innerText;
+            let qrDiv = document.getElementById("qrCode");
+            qrDiv.innerHTML = "";
+            
+            let img = document.createElement("img");
+            img.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encryptedText}`;
+            qrDiv.appendChild(img);
+        }
+    </script>
+</body>
+</html>
